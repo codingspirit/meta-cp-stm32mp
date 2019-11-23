@@ -1,0 +1,41 @@
+This README file contains information on the contents of the meta-cp-stm32mp layer.
+
+Please see the corresponding sections below for details.
+
+Dependencies
+============
+
+  URI: <first dependency>
+  branch: <branch name>
+
+  URI: <second dependency>
+  branch: <branch name>
+
+  .
+  .
+  .
+
+Patches
+=======
+
+Please submit any patches against the meta-cp-stm32mp layer to the xxxx mailing list (xxxx@zzzz.org)
+and cc: the maintainer:
+
+Maintainer: Alex Li <lizhiqin46783937@live.com>
+
+Table of Contents
+=================
+
+  I. Adding the meta-cp-stm32mp layer to your build
+ II. Misc
+
+
+I. Adding the meta-cp-stm32mp layer to your build
+=================================================
+
+Run 'bitbake-layers add-layer meta-cp-stm32mp'
+
+II. Misc
+========
+
+--- replace with specific information about the meta-cp-stm32mp layer ---
