@@ -1,0 +1,93 @@
+#!/bin/sh
+
+configfs="/sys/kernel/config/usb_gadget"
+g=g1
+c=c.1
+d="${configfs}/${g}"
+func_adb=ffs.adb
+mount_point=/dev/usb-ffs/adb
+
+VENDOR_ID="0x18d1"
+PRODUCT_ID="0x4E26"
+MANUFACTURER="Coding Spirit"
+PRODUCT_NAME="CP Board"
+
+do_start() {
+    if [ ! -d ${configfs} ]; then
+        modprobe libcomposite
+        if [ ! -d ${configfs} ]; then
+        exit 1
+        fi
+    fi
+
+    if [ -d ${d} ]; then
+        exit 0
+    fi
+
+    udc=$(ls -1 /sys/class/udc/)
+    if [ -z $udc ]; then
+        echo "No UDC driver registered"
+        exit 1
+    fi
+
+    mkdir "${d}"
+    echo ${VENDOR_ID} > "${d}/idVendor"
+    echo ${PRODUCT_ID} > "${d}/idProduct"
+
+    # Create English strings
+    mkdir -p "${d}/strings/0x409"
+    tr -d '\0' < /proc/device-tree/serial-number > "${d}/strings/0x409/serialnumber"
+    echo ${MANUFACTURER} > "${d}/strings/0x409/manufacturer"
+    echo ${PRODUCT_NAME} > "${d}/strings/0x409/product"
+
+    # Create gadget configuration
+    mkdir -p "${d}/configs/${c}"
+    mkdir -p "${d}/configs/${c}/strings/0x409"
+    echo "Config 1: ADB" > "${d}/configs/${c}/strings/0x409/configuration"
+    echo 250 > "${d}/configs/${c}/MaxPower"
+
+    # Create adb FunctionFS function
+    mkdir -p "${d}/functions/${func_adb}"
+    ln -s "${d}/functions/${func_adb}" "${d}/configs/${c}"
+
+    # Create mount point and start adbd
+    mkdir -p "${mount_point}"
+    mount -t functionfs adb "${mount_point}" -o uid=0,gid=0
+    adbd &
+    sleep 1
+
+    # Enable gadget
+    echo "${udc}" > "${d}/UDC"
+}
+
+do_stop() {
+    count=`ps | grep -w "adbd" | wc -l`
+    if [ $count -ne 0 ]
+    then
+        killall adbd
+    fi
+
+    [ -d "${d}/UDC" ] && echo "" > "${d}/UDC"
+
+    [ -d "${d}/configs/${c}/${func_adb}" ] && rm -f "${d}/configs/${c}/${func_adb}"
+
+    [ -d "${d}/strings/0x409/" ] && rmdir "${d}/strings/0x409/"
+    [ -d "${d}/configs/${c}/strings/0x409" ] && rmdir "${d}/configs/${c}/strings/0x409"
+    [ -d "${d}/configs/${c}" ] && rmdir "${d}/configs/${c}"
+    [ -d "${d}/functions/${func_adb}" ] && rmdir "${d}/functions/${func_adb}"
+    [ -d "${d}" ] && rmdir "${d}"
+}
+
+case $1 in
+    start)
+        echo "Start adb usb gadget"
+        do_start $2
+        ;;
+    stop)
+        echo "Stop adb usb gadget"
+        do_stop
+        ;;
+    *)
+        echo "Usage: $0 (stop | start)"
+        ;;
+esac
