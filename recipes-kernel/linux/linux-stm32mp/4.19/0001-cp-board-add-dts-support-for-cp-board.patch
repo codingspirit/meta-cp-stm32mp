@@ -1,0 +1,422 @@
+From 268f5e041a668c172e6610fb3562887a590e9359 Mon Sep 17 00:00:00 2001
+From: "Alex.Don.Scofield" <lizhiqin46783937@live.com>
+Date: Sun, 1 Dec 2019 10:12:56 +0800
+Subject: [PATCH] cp board: add dts support for cp board
+
+Signed-off-by: Alex.Don.Scofield <lizhiqin46783937@live.com>
+---
+ arch/arm/boot/dts/Makefile           |   3 +-
+ arch/arm/boot/dts/stm32mp157a-cp.dts | 390 +++++++++++++++++++++++++++
+ 2 files changed, 392 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/boot/dts/stm32mp157a-cp.dts
+
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index 566529092..12ee189e1 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -929,7 +929,8 @@ dtb-$(CONFIG_ARCH_STM32) += \
+ 	stm32mp157c-ed1.dtb \
+ 	stm32mp157c-ev1.dtb \
+ 	stm32mp157c-ev1-a7-examples.dtb \
+-	stm32mp157c-ev1-m4-examples.dtb
++	stm32mp157c-ev1-m4-examples.dtb \
++	stm32mp157a-cp.dtb
+ dtb-$(CONFIG_MACH_SUN4I) += \
+ 	sun4i-a10-a1000.dtb \
+ 	sun4i-a10-ba10-tvbox.dtb \
+diff --git a/arch/arm/boot/dts/stm32mp157a-cp.dts b/arch/arm/boot/dts/stm32mp157a-cp.dts
+new file mode 100644
+index 000000000..775671481
+--- /dev/null
++++ b/arch/arm/boot/dts/stm32mp157a-cp.dts
+@@ -0,0 +1,390 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
++/*
++ * Copyright (C) All Rights Reserved
++ * Author: Alex Li <lizhiqin46783937@live.com>.
++ */
++
++/dts-v1/;
++
++#include "stm32mp157c.dtsi"
++#include "stm32mp157c-m4-srm.dtsi"
++#include "stm32mp157caa-pinctrl.dtsi"
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++
++/ {
++	model = "CP STM32MP157A Dev Board V1";
++	compatible = "cp,stm32mp157a-cp", "st,stm32mp157";
++
++	aliases {
++		ethernet0 = &ethernet0;
++		serial0 = &uart4;
++		serial1 = &usart3;
++		serial2 = &uart7;
++	};
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	memory@c0000000 {
++		reg = <0xc0000000 0x20000000>;
++	};
++
++	reserved-memory {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		ranges;
++
++		retram: retram@0x38000000 {
++			compatible = "shared-dma-pool";
++			reg = <0x38000000 0x10000>;
++			no-map;
++		};
++
++		mcuram: mcuram@0x30000000 {
++			compatible = "shared-dma-pool";
++			reg = <0x30000000 0x40000>;
++			no-map;
++		};
++
++		mcuram2: mcuram2@0x10000000 {
++			compatible = "shared-dma-pool";
++			reg = <0x10000000 0x40000>;
++			no-map;
++		};
++
++		vdev0vring0: vdev0vring0@10040000 {
++			compatible = "shared-dma-pool";
++			reg = <0x10040000 0x2000>;
++			no-map;
++		};
++
++		vdev0vring1: vdev0vring1@10042000 {
++			compatible = "shared-dma-pool";
++			reg = <0x10042000 0x2000>;
++			no-map;
++		};
++
++		vdev0buffer: vdev0buffer@10044000 {
++			compatible = "shared-dma-pool";
++			reg = <0x10044000 0x4000>;
++			no-map;
++		};
++
++		gpu_reserved: gpu@dc000000 {
++			reg = <0xdc000000 0x4000000>;
++			no-map;
++		};
++	};
++
++	sram: sram@10050000 {
++		compatible = "mmio-sram";
++		reg = <0x10050000 0x10000>;
++		#address-cells = <1>;
++		#size-cells = <1>;
++		ranges = <0 0x10050000 0x10000>;
++
++		dma_pool: dma_pool@0 {
++			reg = <0x0 0x10000>;
++			pool;
++		};
++	};
++
++	led {
++		compatible = "gpio-leds";
++		led1 {
++			label = "led1-blue";
++			gpios = <&gpioi 11 GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "heartbeat";
++			default-state = "on";
++		};
++
++		led2 {
++			label = "led2-blue";
++			gpios = <&gpioh 6 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++		};
++
++	};
++
++	usb_phy_tuning: usb-phy-tuning {
++		st,hs-dc-level = <2>;
++		st,fs-rftime-tuning;
++		st,hs-rftime-reduction;
++		st,hs-current-trim = <15>;
++		st,hs-impedance-trim = <1>;
++		st,squelch-level = <3>;
++		st,hs-rx-offset = <2>;
++		st,no-lsfs-sc;
++	};
++
++	v3v3: regulator-3p3v {
++		compatible = "regulator-fixed";
++		regulator-name = "v3v3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	vdd: regulator-vdd {
++		compatible = "regulator-fixed";
++		regulator-name = "vdd";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	vdd_usb: regulator-vdd-usb {
++		compatible = "regulator-fixed";
++		regulator-name = "vdd_usb";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++};
++
++&pinctrl {
++
++	pwm2_pins_b: pwm2-0 {
++		pins {
++			pinmux = <STM32_PINMUX('A', 5, AF1)>; /* TIM2_CH1 */
++			bias-pull-down;
++			drive-push-pull;
++			slew-rate = <0>;
++		};
++	};
++
++	pwm2_sleep_pins_b: pwm2-sleep-0 {
++		pins {
++			pinmux = <STM32_PINMUX('A', 5, ANALOG)>; /* TIM2_CH1 */
++		};
++	};
++
++	uart5_pins_a: uart5-0 {
++		pins1 {
++			pinmux = <STM32_PINMUX('B', 13, AF14)>; /* UART5_TX */
++			bias-disable;
++			drive-push-pull;
++			slew-rate = <0>;
++		};
++		pins2 {
++			pinmux = <STM32_PINMUX('B', 5, AF12)>; /* UART5_RX */
++			bias-disable;
++		};
++	};
++
++	uart5_idle_pins_a: uart5-idle-0 {
++		pins1 {
++			pinmux = <STM32_PINMUX('B', 13, ANALOG)>; /* UART5_TX */
++		};
++		pins2 {
++			pinmux = <STM32_PINMUX('B', 5, AF7)>; /* UART5_RX */
++			bias-disable;
++		};
++	};
++
++	uart5_sleep_pins_a: uart5-sleep-0 {
++		pins {
++			pinmux = <STM32_PINMUX('B', 13, ANALOG)>, /* UART5_TX */
++				 <STM32_PINMUX('B', 5, ANALOG)>; /* UART5_RX */
++		};
++	};
++};
++
++&cec {
++	pinctrl-names = "default", "sleep";
++	pinctrl-0 = <&cec_pins_a>;
++	pinctrl-1 = <&cec_pins_sleep_a>;
++	status = "okay";
++};
++
++&dma1 {
++	sram = <&dma_pool>;
++};
++
++&dma2 {
++	sram = <&dma_pool>;
++};
++
++&dts {
++	status = "okay";
++};
++
++&ethernet0 {
++	status = "okay";
++	pinctrl-0 = <&ethernet0_rgmii_pins_a>;
++	pinctrl-1 = <&ethernet0_rgmii_pins_sleep_a>;
++	pinctrl-names = "default", "sleep";
++	phy-mode = "rgmii";
++	max-speed = <1000>;
++	phy-handle = <&phy0>;
++
++	mdio0 {
++		#address-cells = <1>;
++		#size-cells = <0>;
++		compatible = "snps,dwmac-mdio";
++		phy0: ethernet-phy@0 {
++			reg = <0>;
++		};
++	};
++};
++
++&gpu {
++	contiguous-area = <&gpu_reserved>;
++	status = "okay";
++};
++
++&ipcc {
++	status = "okay";
++};
++
++&iwdg2 {
++	timeout-sec = <32>;
++	status = "okay";
++};
++
++&m4_rproc {
++	memory-region = <&retram>, <&mcuram>, <&mcuram2>, <&vdev0vring0>,
++			<&vdev0vring1>, <&vdev0buffer>;
++	mboxes = <&ipcc 0>, <&ipcc 1>, <&ipcc 2>;
++	mbox-names = "vq0", "vq1", "shutdown";
++	interrupt-parent = <&exti>;
++	interrupts = <68 1>;
++	interrupt-names = "wdg";
++	recovery;
++	status = "okay";
++};
++
++&pwr {
++	pwr-supply = <&vdd>;
++};
++
++&rng1 {
++	status = "okay";
++};
++
++&rtc {
++	status = "okay";
++};
++
++/* sd card slot */
++&sdmmc1 {
++	pinctrl-names = "default", "opendrain", "sleep";
++	pinctrl-0 = <&sdmmc1_b4_pins_a>;
++	pinctrl-1 = <&sdmmc1_b4_od_pins_a>;
++	pinctrl-2 = <&sdmmc1_b4_sleep_pins_a>;
++	broken-cd;
++	st,neg-edge;
++	bus-width = <4>;
++	vmmc-supply = <&v3v3>;
++	status = "okay";
++};
++
++/* emmc flash */
++&sdmmc2 {
++	pinctrl-names = "default", "opendrain", "sleep";
++	pinctrl-0 = <&sdmmc2_b4_pins_b &sdmmc2_d47_pins_a>;
++	pinctrl-1 = <&sdmmc2_b4_od_pins_b>;
++	pinctrl-2 = <&sdmmc2_b4_sleep_pins_a &sdmmc2_d47_sleep_pins_a>;
++	non-removable;
++	st,neg-edge;
++	bus-width = <8>;
++	vmmc-supply = <&v3v3>;
++	keep-power-in-suspend;
++	status = "okay";
++};
++
++&spi4 {
++	pinctrl-names = "default", "sleep";
++	pinctrl-0 = <&spi4_pins_a>;
++	pinctrl-1 = <&spi4_sleep_pins_a>;
++	status = "disabled";
++};
++
++&spi5 {
++	pinctrl-names = "default", "sleep";
++	pinctrl-0 = <&spi5_pins_a>;
++	pinctrl-1 = <&spi5_sleep_pins_a>;
++	status = "disabled";
++};
++
++&timers2 {
++	status = "okay";
++	/* spare dmas for other usage */
++	/delete-property/dmas;
++	/delete-property/dma-names;
++	pwm2: pwm {
++		pinctrl-0 = <&pwm2_pins_b>;
++		pinctrl-1 = <&pwm2_sleep_pins_b>;
++		pinctrl-names = "default", "sleep";
++		#pwm-cells = <2>;
++		status = "okay";
++	};
++	timer@1 {
++		status = "disabled";
++	};
++};
++
++&uart4 {
++	pinctrl-names = "default", "sleep", "idle", "no_console_suspend";
++	pinctrl-0 = <&uart4_pins_a>;
++	pinctrl-1 = <&uart4_sleep_pins_a>;
++	pinctrl-2 = <&uart4_idle_pins_a>;
++	pinctrl-3 = <&uart4_pins_a>;
++	status = "okay";
++};
++
++&uart5 {
++	pinctrl-names = "default", "sleep", "idle";
++	pinctrl-0 = <&uart5_pins_a>;
++	pinctrl-1 = <&uart5_sleep_pins_a>;
++	pinctrl-2 = <&uart5_idle_pins_a>;
++	status = "okay";
++};
++
++&usart3 {
++	pinctrl-names = "default", "sleep", "idle";
++	pinctrl-0 = <&usart3_pins_b>;
++	pinctrl-1 = <&usart3_sleep_pins_b>;
++	pinctrl-2 = <&usart3_idle_pins_b>;
++	status = "disabled";
++};
++
++&usbh_ehci {
++	phys = <&usbphyc_port0>;
++	phy-names = "usb";
++	status = "okay";
++};
++
++&usbotg_hs {
++	dr_mode = "peripheral";
++	force-b-session-valid;
++	phys = <&usbphyc_port1 0>;
++	phy-names = "usb2-phy";
++	status = "okay";
++};
++
++&usbphyc {
++	vdd3v3-supply = <&vdd_usb>;
++	status = "okay";
++};
++
++&usbphyc_port0 {
++	st,phy-tuning = <&usb_phy_tuning>;
++};
++
++&usbphyc_port1 {
++	st,phy-tuning = <&usb_phy_tuning>;
++};
++
++&vrefbuf {
++	regulator-min-microvolt = <2500000>;
++	regulator-max-microvolt = <2500000>;
++	vdda-supply = <&vdd>;
++	status = "okay";
++};
