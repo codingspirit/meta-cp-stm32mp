@@ -14,6 +14,10 @@ IMAGE_FEATURES += "\
 
 DEV_SUPPORT = "android-tools"
 
+DRV_SUPPORT = "kernel-module-rtl8812au"
+
+NET_SUPPORT = "wpa-supplicant"
+
 #
 # INSTALL addons
 #
@@ -24,4 +28,6 @@ CORE_IMAGE_EXTRA_INSTALL += " \
     ${@bb.utils.contains('COMBINED_FEATURES', 'optee', 'packagegroup-optee-core', '', d)}   \
     ${@bb.utils.contains('COMBINED_FEATURES', 'optee', 'packagegroup-optee-test', '', d)}   \
     ${DEV_SUPPORT} \
+    ${DRV_SUPPORT} \
+    ${NET_SUPPORT} \
     "
