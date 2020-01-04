@@ -1,0 +1,1 @@
+RDEPENDS_packagegroup-framework-tools-base-core_remove = "usbotg-gadget-config"
