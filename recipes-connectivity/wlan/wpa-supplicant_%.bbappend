@@ -9,7 +9,7 @@ FILES_${PN} += " \
     ${sysconfdir}/wpa_supplicant/wpa_supplicant-wlan0.conf \
 "
 
-SYSTEMD_AUTO_ENABLE = "enable"
+SYSTEMD_AUTO_ENABLE = "disable"
 SYSTEMD_SERVICE_${PN}_append = " wpa_supplicant@wlan0.service"
 
 do_install_append() {
