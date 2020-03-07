@@ -1,5 +1,5 @@
 AUTHOR = "Alex Li <lizhiqin46783937@live.com>"
-SUMMSUMMARY = "Core image suitble for no-graphic develoopment"
+SUMMARY = "Core image suitble for no-graphic develoopment"
 
 include recipes-cp/images/cp-image.inc
 
@@ -16,7 +16,7 @@ DEV_SUPPORT = "android-tools"
 
 DRV_SUPPORT = "kernel-module-rtl8812au"
 
-NET_SUPPORT = "wpa-supplicant"
+NET_SUPPORT = "networkd wpa-supplicant"
 
 #
 # INSTALL addons
@@ -30,4 +30,4 @@ CORE_IMAGE_EXTRA_INSTALL += " \
     ${DEV_SUPPORT} \
     ${DRV_SUPPORT} \
     ${NET_SUPPORT} \
-    "
+"
