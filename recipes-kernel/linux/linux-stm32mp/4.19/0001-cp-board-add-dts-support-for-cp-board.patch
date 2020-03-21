@@ -1,4 +1,4 @@
-From 268f5e041a668c172e6610fb3562887a590e9359 Mon Sep 17 00:00:00 2001
+From 60072a17e91a5b5bafd0f9078dc65b371a3bb334 Mon Sep 17 00:00:00 2001
 From: "Alex.Don.Scofield" <lizhiqin46783937@live.com>
 Date: Sun, 1 Dec 2019 10:12:56 +0800
 Subject: [PATCH] cp board: add dts support for cp board
@@ -26,7 +26,7 @@ index 566529092..12ee189e1 100644
  	sun4i-a10-ba10-tvbox.dtb \
 diff --git a/arch/arm/boot/dts/stm32mp157a-cp.dts b/arch/arm/boot/dts/stm32mp157a-cp.dts
 new file mode 100644
-index 000000000..775671481
+index 000000000..3e0530351
 --- /dev/null
 +++ b/arch/arm/boot/dts/stm32mp157a-cp.dts
 @@ -0,0 +1,390 @@
@@ -39,8 +39,8 @@ index 000000000..775671481
 +/dts-v1/;
 +
 +#include "stm32mp157c.dtsi"
-+#include "stm32mp157c-m4-srm.dtsi"
 +#include "stm32mp157caa-pinctrl.dtsi"
++#include "stm32mp157c-m4-srm.dtsi"
 +#include <dt-bindings/gpio/gpio.h>
 +#include <dt-bindings/input/input.h>
 +
@@ -420,3 +420,6 @@ index 000000000..775671481
 +	vdda-supply = <&vdd>;
 +	status = "okay";
 +};
+-- 
+2.17.1
+
