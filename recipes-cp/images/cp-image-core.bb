@@ -12,11 +12,15 @@ IMAGE_FEATURES += "\
     ssh-server-dropbear \
     "
 
+IMAGE_FSTYPES_append = " ext4.gz"
+
 DEV_SUPPORT = "android-tools"
 
 DRV_SUPPORT = "kernel-module-rtl8812au"
 
 NET_SUPPORT = "networkd wpa-supplicant"
+
+SWU_SUPPORT = "swupdate swupdate-www libubootenv-bin"
 
 #
 # INSTALL addons
@@ -30,4 +34,5 @@ CORE_IMAGE_EXTRA_INSTALL += " \
     ${DEV_SUPPORT} \
     ${DRV_SUPPORT} \
     ${NET_SUPPORT} \
+    ${SWU_SUPPORT} \
 "

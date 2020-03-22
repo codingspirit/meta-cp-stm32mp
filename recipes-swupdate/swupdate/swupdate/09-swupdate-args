@@ -1,0 +1,3 @@
+HARDWARE="stm32mp157a-cp:1.0"
+CFGFILE="/etc/swupdate.cfg"
+SWUPDATE_ARGS="-H ${HARDWARE} -f ${CFGFILE}"
