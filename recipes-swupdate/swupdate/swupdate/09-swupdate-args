@@ -1,3 +1,11 @@
+rootfs=`mount | grep "on / type" | cut -d':' -f 2 | cut -d' ' -f 1`
+
+if [ $rootfs == '/dev/mmcblk0p7' ];then
+	selection="stable,rootfs1"
+else
+	selection="stable,rootfs2"
+fi
+
 HARDWARE="stm32mp157a-cp:1.0"
 CFGFILE="/etc/swupdate.cfg"
-SWUPDATE_ARGS="-H ${HARDWARE} -f ${CFGFILE}"
+SWUPDATE_ARGS="-H ${HARDWARE} -e ${selection} -f ${CFGFILE}"

@@ -20,7 +20,7 @@ DRV_SUPPORT = "kernel-module-rtl8812au"
 
 NET_SUPPORT = "networkd wpa-supplicant"
 
-SWU_SUPPORT = "swupdate swupdate-www libubootenv-bin"
+SWU_SUPPORT = "swupdate swupdate-www swupdate-tools u-boot-fw-utils"
 
 #
 # INSTALL addons

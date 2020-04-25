@@ -4,15 +4,31 @@ software =
 
 	stm32mp157a-cp = {
 		hardware-compatibility: [ "1.0" ];
-		images: (
-			{
-				filename = "cp-image-core-openstlinux-eglfs-stm32mp1-cp.ext4.gz";
-				type = "raw";
-				sha256 = "@cp-image-core-openstlinux-eglfs-stm32mp1-cp.ext4.gz";
-				installed-directly = true;
-				compressed = true;
-				device = "/dev/mmcblk0p6";
-			}
-		);
+		stable : {
+			rootfs1 : {
+				images: (
+					{
+						filename = "cp-image-core-openstlinux-eglfs-stm32mp1-cp.ext4.gz";
+						type = "raw";
+						sha256 = "@cp-image-core-openstlinux-eglfs-stm32mp1-cp.ext4.gz";
+						installed-directly = true;
+						compressed = true;
+						device = "/dev/mmcblk0p6";
+					}
+				);
+			};
+			rootfs2 : {
+				images: (
+					{
+						filename = "cp-image-core-openstlinux-eglfs-stm32mp1-cp.ext4.gz";
+						type = "raw";
+						sha256 = "@cp-image-core-openstlinux-eglfs-stm32mp1-cp.ext4.gz";
+						installed-directly = true;
+						compressed = true;
+						device = "/dev/mmcblk0p7";
+					}
+				);
+			};
+		};
 	};
 }
