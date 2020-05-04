@@ -1,0 +1,156 @@
+From 4182c210ddf2c13b8ca89fa2805d2dac84124b15 Mon Sep 17 00:00:00 2001
+From: "Alex.Don.Scofield" <lizhiqin46783937@live.com>
+Date: Mon, 4 May 2020 18:54:49 +0800
+Subject: [PATCH] dts: add support for audio
+
+---
+ arch/arm/boot/dts/stm32mp157a-cp.dts | 112 +++++++++++++++++++++++++++
+ 1 file changed, 112 insertions(+)
+
+diff --git a/arch/arm/boot/dts/stm32mp157a-cp.dts b/arch/arm/boot/dts/stm32mp157a-cp.dts
+index 3e0530351..18fa12d8f 100644
+--- a/arch/arm/boot/dts/stm32mp157a-cp.dts
++++ b/arch/arm/boot/dts/stm32mp157a-cp.dts
+@@ -108,6 +108,17 @@
+ 
+ 	};
+ 
++	sound {
++		compatible = "audio-graph-card";
++		label = "STM32MP1-CP";
++		routing =
++			"Playback" , "MCLK",
++			"Capture" , "MCLK",
++			"MICL" , "Mic Bias";
++		dais = <&sai2a_port &sai2b_port>;
++		status = "okay";
++	};
++
+ 	usb_phy_tuning: usb-phy-tuning {
+ 		st,hs-dc-level = <2>;
+ 		st,fs-rftime-tuning;
+@@ -128,6 +139,15 @@
+ 		regulator-boot-on;
+ 	};
+ 
++	v1v8_audio: regulator-v1v8-audio {
++		compatible = "regulator-fixed";
++		regulator-name = "v1v8_audio";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
+ 	vdd: regulator-vdd {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vdd";
+@@ -239,6 +259,53 @@
+ 	status = "okay";
+ };
+ 
++&i2c5 {
++	pinctrl-names = "default", "sleep";
++	pinctrl-0 = <&i2c5_pins_a>;
++	pinctrl-1 = <&i2c5_pins_sleep_a>;
++	i2c-scl-rising-time-ns = <100>;
++	i2c-scl-falling-time-ns = <7>;
++	status = "okay";
++	/delete-property/dmas;
++	/delete-property/dma-names;
++
++	cs42l51: cs42l51@4a {
++		compatible = "cirrus,cs42l51";
++		reg = <0x4a>;
++		#sound-dai-cells = <0>;
++		status = "okay";
++
++		VL-supply = <&v3v3>;
++		VD-supply = <&v1v8_audio>;
++		VA-supply = <&v1v8_audio>;
++		VAHP-supply = <&v1v8_audio>;
++
++		reset-gpios = <&gpioc 0 GPIO_ACTIVE_LOW>;
++
++		clocks = <&sai2a>;
++		clock-names = "MCLK";
++
++		cs42l51_port: port {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			cs42l51_tx_endpoint: endpoint@0 {
++				reg = <0>;
++				remote-endpoint = <&sai2a_endpoint>;
++				frame-master;
++				bitclock-master;
++			};
++
++			cs42l51_rx_endpoint: endpoint@1 {
++				reg = <1>;
++				remote-endpoint = <&sai2b_endpoint>;
++				frame-master;
++				bitclock-master;
++			};
++		};
++	};
++};
++
+ &ipcc {
+ 	status = "okay";
+ };
+@@ -272,6 +339,51 @@
+ 	status = "okay";
+ };
+ 
++&sai2 {
++	clocks = <&rcc SAI2>, <&rcc PLL3_Q>, <&rcc PLL3_R>;
++	clock-names = "pclk", "x8k", "x11k";
++	pinctrl-names = "default", "sleep";
++	pinctrl-0 = <&sai2a_pins_a>, <&sai2b_pins_b>;
++	pinctrl-1 = <&sai2a_sleep_pins_a>, <&sai2b_sleep_pins_b>;
++	status = "okay";
++
++	sai2a: audio-controller@4400b004 {
++		#clock-cells = <0>;
++		dma-names = "tx";
++		clocks = <&rcc SAI2_K>;
++		clock-names = "sai_ck";
++		status = "okay";
++
++		sai2a_port: port {
++			sai2a_endpoint: endpoint {
++				remote-endpoint = <&cs42l51_tx_endpoint>;
++				format = "i2s";
++				mclk-fs = <256>;
++				dai-tdm-slot-num = <2>;
++				dai-tdm-slot-width = <32>;
++			};
++		};
++	};
++
++	sai2b: audio-controller@4400b024 {
++		dma-names = "rx";
++		st,sync = <&sai2a 2>;
++		status = "okay";
++		clocks = <&rcc SAI2_K>, <&sai2a>;
++		clock-names = "sai_ck", "MCLK";
++
++		sai2b_port: port {
++			sai2b_endpoint: endpoint {
++				remote-endpoint = <&cs42l51_rx_endpoint>;
++				format = "i2s";
++				mclk-fs = <256>;
++				dai-tdm-slot-num = <2>;
++				dai-tdm-slot-width = <32>;
++			};
++		};
++	};
++};
++
+ /* sd card slot */
+ &sdmmc1 {
+ 	pinctrl-names = "default", "opendrain", "sleep";
+-- 
+2.17.1
+
